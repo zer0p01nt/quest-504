@@ -1,0 +1,29 @@
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+*.local.properties
+
+# Java / Gradle
+.gradle/
+**/build/
+*.class
+*.log
+
+# Frontend (future)
+node_modules/
+dist/
+coverage/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local data
+.pgdata/
+
+# Temporary Initializr reference project
+/_initializr/
