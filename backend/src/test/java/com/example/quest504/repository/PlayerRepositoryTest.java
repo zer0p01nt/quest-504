@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase(
         replace = AutoConfigureTestDatabase.Replace.NONE
 )
-public class PlayerRepositoryTest {
+class PlayerRepositoryTest {
     @Autowired
     private PlayerRepository playerRepository;
 

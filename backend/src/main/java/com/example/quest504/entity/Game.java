@@ -52,6 +52,14 @@ public class Game {
         return player;
     }
 
+    public String getSecret() {
+        return secret;
+    }
+
+    public LocalDateTime getSolvedAt() {
+        return solvedAt;
+    }
+
     public void solve() {
         if (this.status == GameStatus.PLAYING) {
             this.status = GameStatus.SOLVED;
