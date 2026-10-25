@@ -66,3 +66,27 @@
 - Java 환경, Wrapper 부트스트랩, 기본 테스트와 빌드 확인 항목은 Windows 환경에서 완료됐다. 이전 WSL 실패 기록은 해당 환경의 이력으로 남긴다.
 - AI 변경 파일: README.md, docs/WORKLOG.md. 검증 상태만 갱신했으며 기능 코드는 변경하지 않았다. 이번 문서 변경을 위해 테스트를 재실행하지 않았다.
 - 남은 작업: 순수 Java 판정 실습을 개발자가 직접 작성. PostgreSQL/서버 실행/DB 통합 테스트/Git 상태 정리는 후속 요청에서 진행한다.
+
+## 2026-10-25 — PostgreSQL 개발 설정 작성 (AI 작업)
+
+- 사용자 승인 후 compose.yaml, .env.example, Git 제외된 .env 생성.
+- application.properties의 앱 이름을 유지하며 application.yaml로 전환.
+- PostgreSQL 17, localhost 포트, named volume, healthcheck 구성.
+- backend에서 실행할 때 ../.env를 properties로 읽고 JDBC 연결 및 ddl-auto=update 적용.
+- 실제 비밀번호는 .env에만 임의 생성했으며 출력하지 않았다.
+- 기존 .gitignore/build.gradle/Entity/Repository/비즈니스 로직/테스트는 변경하지 않았다.
+- README에 PowerShell/WSL 실행법, 설정 개념, 볼륨 보존 및 검증 범위를 기록했다.
+- docker compose config --quiet 성공. git check-ignore .env 성공.
+- 전체 git diff --check는 기존 개발자 Java 파일의 CRLF 관련 공백 경고로 실패했다.
+  해당 파일은 변경하지 않았다.
+- 현재 WSL java 명령 없음. 컨테이너/앱 실행과 DB 연결은 미검증.
+- 사용자 요청에 따라 다음 실행 단계는 확인받고 진행한다. 테스트 작성/실행 없음.
+
+## 2026-10-25 — Docker 실행 단계 확인 (AI 작업)
+
+- 사용자 승인 후 docker info --format '{{.ServerVersion}}' 실행.
+- 기본 권한: unix:///var/run/docker.sock 접근 permission denied (exit 1).
+- 권한 확장 재시도: /var/run/docker.sock no such file or directory (exit 1).
+- Docker 서버 버전 확인 실패. compose up은 실행하지 못했고 컨테이너/볼륨을 변경하지 않았다.
+- DB 인증/쿼리/앱 연결/테이블 생성은 미검증. 테스트 실행 없음.
+- README 검증 결과 갱신. Docker Desktop 실행과 WSL Integration 확인 후 재시도 필요.

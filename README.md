@@ -19,7 +19,7 @@ quest-504/
 │   ├── gradle/wrapper/
 │   └── src/
 │       ├── main/java/com/example/quest504/Quest504Application.java
-│       ├── main/resources/application.properties
+│       ├── main/resources/application.yaml
 │       ├── test/java/com/example/quest504/Quest504ApplicationTests.java
 │       └── test/resources/application-test.properties
 ├── frontend/README.md
@@ -36,7 +36,7 @@ quest-504/
 - Spring dependency-management Gradle plugin: 1.1.7
 - Web, Data JPA, Validation, PostgreSQL Driver, Boot Test(JUnit 5/Mockito), JUnit Platform launcher
 - 라이브러리 버전은 Spring Boot BOM에 맡긴다. 개발자가 Windows에서 의존성 해결, 기본 테스트 및 빌드 성공을 확인했다.
-- Security, Docker Compose, React는 후속 단계다. PostgreSQL 서버 버전도 해당 단계에서 확정한다.
+- Security, React는 후속 단계다. 로컬 PostgreSQL은 아래 Compose 설정을 사용한다.
 
 [Spring Boot 3.5 공식 요구사항](https://docs.spring.io/spring-boot/3.5/system-requirements.html)은 Java 21 및 Gradle 8.x 사용을 지원한다.
 [Gradle 8.14.6 릴리스](https://docs.gradle.org/8.14.6/release-notes.html)를 참고했다.
@@ -89,3 +89,85 @@ Initializr UI에는 현재 3.x가 제공되지 않으므로 3.5.x 선택 안내�
 [WORKLOG](docs/WORKLOG.md)에는 실제 명령과 검증 한계를 기록한다.
 이번 초기 소스/문서는 AI가 작성했으며, 기존 개발자 기능 코드는 발견되지 않았다.
 실제 비밀번호/토큰/DB 접속 정보는 저장하지 않는다.
+
+## PostgreSQL 로컬 개발 (2026-10-25, AI 설정)
+
+루트 `compose.yaml`은 PostgreSQL 17을 실행하고 named volume `postgres_data`에
+데이터를 보존한다. 포트는 로컬 컴퓨터의 `127.0.0.1`에만 공개한다.
+`build.gradle`의 JPA/PostgreSQL/테스트 의존성은 이미 갖춰져 있어 변경하지 않았다.
+Entity, Repository, 비즈니스 로직과 기존 테스트 설정도 변경하지 않았다.
+
+### 접속 정보
+
+이번 작업 환경에는 Git에서 제외되는 루트 `.env`를 생성하고 임의 비밀번호를 넣었다.
+다른 체크아웃에서는 `.env.example`을 `.env`로 복사한 뒤 빈 비밀번호를 직접 채운다.
+PowerShell에서는 `Copy-Item .env.example .env`, bash에서는 `cp .env.example .env`를
+사용한다. 기존 `.env`가 있으면 덮어쓰지 않는다.
+
+Compose는 루트 `.env`를 자동으로 읽는다. Spring Boot는 `backend/`를 작업 디렉터리로
+실행할 때 `spring.config.import`를 통해 `../.env`를 properties 형식으로 읽는다.
+IDE에서도 작업 디렉터리를 `backend/`로 지정한다. `.env`를 사용하지 않는 경우에는
+같은 키를 프로세스 환경변수로 제공할 수 있다.
+
+두 파서가 동일하게 읽도록 따옴표, `export`, 줄 끝 주석 없이 `KEY=value`로 작성한다.
+비밀번호는 영문/숫자 조합을 사용한다. `.env` 내용이나 비밀번호를 Git에 추가하지 않는다.
+`docker compose config`는 비밀번호를 출력할 수 있으므로 검증 시 `--quiet`를 붙인다.
+
+### 실행 순서
+
+Docker Desktop 또는 Docker 데몬이 실행 중이어야 한다. 저장소 루트에서:
+
+```sh
+docker compose config --quiet
+docker compose up -d --wait postgres
+docker compose ps
+```
+
+Java 21이 준비된 Windows PowerShell에서 `backend/`로 이동한 후:
+
+```powershell
+.\gradlew.bat bootRun
+```
+
+Linux/WSL에 Linux용 Java 21이 있다면 같은 위치에서 `./gradlew bootRun`을 사용한다.
+앱은 호스트의 `localhost:5432`로 연결한다. 포트 충돌 시 루트 `.env`의 `DB_PORT`를
+변경하면 Compose의 공개 포트와 앱의 연결 포트가 함께 바뀐다.
+`DB_HOST`는 앱의 DB 호스트이며, 컨테이너 내부 포트는 계속 5432다.
+
+DB 접속을 직접 확인하려면 루트에서:
+
+```sh
+docker compose exec postgres psql -h 127.0.0.1 -U quest504 -d quest504 -W
+```
+
+`.env`의 비밀번호를 프롬프트에 입력한다. 사용자/DB 이름을 바꿨다면 위 인자도 바꾼다.
+접속 후 `SELECT current_database(), current_user;`, `\dt`로 DB와 테이블을 확인하고
+`\q`로 종료한다. 앱 시작 전에는 테이블이 없을 수 있다.
+이 확인은 컨테이너 내부 TCP 접속이다. 호스트에서 실행한 앱의 DB 연결은 앱 로그로 별도 확인한다.
+
+종료는 앱 터미널에서 Ctrl+C, 루트에서 `docker compose stop postgres`를 사용한다.
+기존 데이터 보존을 위해 볼륨 삭제 명령은 실행하지 않는다.
+이미 초기화된 볼륨에서는 `.env`의 DB 이름/사용자/비밀번호를 변경해도 기존 DB에
+자동 반영되지 않는다. 기존 값을 유지하거나 DB에서 명시적으로 변경해야 한다.
+
+### 이해할 설정
+
+- JDBC URL: Java가 접속할 DB의 주소·포트·이름이다.
+- PostgreSQL JDBC 드라이버: Java와 PostgreSQL 사이의 통신을 담당한다.
+- JPA/Hibernate: Entity 매핑을 이용해 SQL을 실행한다. Repository는 이 위에서 동작한다.
+- `ddl-auto: update`: 앱 시작 시 Entity와 DB 스키마를 비교해 테이블 등을 생성·변경한다.
+  데이터 변경 이력을 관리하거나 모든 스키마 변경을 해결하는 도구는 아니다.
+- named volume: 컨테이너와 별도로 DB 파일을 보존한다.
+- healthcheck: PostgreSQL의 접속 준비 여부를 확인하며 앱 연결·테이블 생성을 보장하지 않는다.
+
+설정 근거: [Spring Boot 외부 설정](https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html),
+[PostgreSQL 공식 이미지](https://hub.docker.com/_/postgres).
+
+### 이번 단계의 실제 검증
+
+- `docker compose config --quiet`: 성공 (Compose 구문/변수 치환 확인).
+- `git check-ignore .env`: `.env` 제외 확인.
+- Java: 현재 AI의 WSL 환경에 `java` 명령이 없어 앱 실행 불가.
+- 사용자 실행 승인 후 Docker 접근 확인: 기본 권한에서는 Docker 소켓 permission denied, 권한 확장 후에는 /var/run/docker.sock 없음으로 실패. 컨테이너 실행 단계에 도달하지 못했다.
+- 앱 실행, DB 연결 및 테이블 생성: 미검증. Docker Desktop/WSL 연동 확인과 Java 실행 환경이 필요하다.
+- 테스트 코드는 추가하지 않았고 테스트도 실행하지 않았다.
