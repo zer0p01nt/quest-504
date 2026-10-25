@@ -48,6 +48,10 @@ public class Game {
         return status;
     }
 
+    public Player getPlayer() {
+        return player;
+    }
+
     public void solve() {
         if (this.status == GameStatus.PLAYING) {
             this.status = GameStatus.SOLVED;
