@@ -45,6 +45,10 @@ public class Player {
         return username;
     }
 
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
     public long  getGold() {
         return gold;
     }
