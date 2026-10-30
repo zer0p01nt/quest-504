@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -35,7 +37,7 @@ class RewardServiceTest {
     @Test
     void claimRewardSuccessTest() {
         // 1. Player 생성 및 저장
-        Player player = new Player("player1", "dummy-hash");
+        Player player = new Player("player-" + UUID.randomUUID(), "dummy-hash");
         playerRepository.saveAndFlush(player);
         Long playerId = player.getId();
 
@@ -80,7 +82,7 @@ class RewardServiceTest {
     @Test
     void claimRewardBeforeSolvedTest() {
         // 1. Player 생성 및 저장
-        Player player = new Player("player1", "dummy-hash");
+        Player player = new Player("player-" + UUID.randomUUID(), "dummy-hash");
         playerRepository.saveAndFlush(player);
         Long playerId = player.getId();
 
@@ -104,7 +106,7 @@ class RewardServiceTest {
     @Test
     void claimRewardTwiceTest() {
         // 1. Player 생성 및 저장
-        Player player = new Player("player1", "dummy-hash");
+        Player player = new Player("player-" + UUID.randomUUID(), "dummy-hash");
         playerRepository.saveAndFlush(player);
         Long playerId = player.getId();
 

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
@@ -28,7 +30,7 @@ class GameRepositoryTest {
     @Test
     void saveAndFindGameTest() {
         // Player 저장
-        Player player = new Player("player1", "dummy-hash");
+        Player player = new Player("player-" + UUID.randomUUID(), "dummy-hash");
         playerRepository.saveAndFlush(player);
 
         // 저장한 Player로 Game 생성

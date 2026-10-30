@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,7 +36,7 @@ class GameServiceTest {
     @Test
     void startGameTest() {
         // 1. 테스트용 Player 생성 및 저장
-        Player player = new Player("testplayer", "dummy-hash");
+        Player player = new Player("player-" + UUID.randomUUID(), "dummy-hash");
         Player testPlayer = playerRepository.saveAndFlush(player);
 
         // 2. gameService.startGame(playerId) 호출
@@ -65,7 +66,7 @@ class GameServiceTest {
     @Test
     void submitCorrectGuessTest() {
         // 1. Player 생성 및 저장
-        Player player = new Player("player1", "dummy-hash");
+        Player player = new Player("player-" + UUID.randomUUID(), "dummy-hash");
         playerRepository.saveAndFlush(player);
 
         // 2. 정답이 427인 Game 생성 및 저장
@@ -92,7 +93,7 @@ class GameServiceTest {
     @Test
     void submitIncorrectGuessTest() {
         // 1. Player 생성 및 저장
-        Player player = new Player("player1", "dummy-hash");
+        Player player = new Player("player-" + UUID.randomUUID(), "dummy-hash");
         playerRepository.saveAndFlush(player);
 
         // 2. 정답이 427인 Game 생성 및 저장
@@ -119,7 +120,7 @@ class GameServiceTest {
     @Test
     void submitGuessToSolvedGameTest() {
         // 1. Player 생성 및 저장
-        Player player = new Player("player1", "dummy-hash");
+        Player player = new Player("player-" + UUID.randomUUID(), "dummy-hash");
         playerRepository.saveAndFlush(player);
 
         // 2. Game 생성 및 저장 (정답: "427")
@@ -136,8 +137,8 @@ class GameServiceTest {
 
     @Test
     void submitGuessByOtherPlayerTest() {
-        Player player1 = new Player("player1", "dummy-hash");
-        Player player2 = new Player("player2", "dummy-hash");
+        Player player1 = new Player("player1-" + UUID.randomUUID(), "dummy-hash");
+        Player player2 = new Player("player2-" + UUID.randomUUID(), "dummy-hash");
 
         playerRepository.saveAndFlush(player1);
         playerRepository.saveAndFlush(player2);
