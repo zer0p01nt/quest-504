@@ -14,13 +14,12 @@ public class CurrentPlayerService {
         this.playerRepository = playerRepository;
     }
 
-    public Long getPlayerId(String username) {
-        // 1. username으로 Player 조회
-        Player player = playerRepository.findByUsername(username).orElseThrow(() ->
-                new NoSuchElementException("사용자를 찾을 수 없습니다.") // 2. 없으면 NoSuchElementException 발생
-        );
+    public Player getPlayer(String username) {
+        return playerRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+    }
 
-        // 3. Player의 id 반환
-        return player.getId();
+    public Long getPlayerId(String username) {
+        return getPlayer(username).getId();
     }
 }
