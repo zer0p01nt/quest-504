@@ -576,12 +576,20 @@ function GameScreen({
                       {item.value}
                     </strong>
                     <div className='history-list__scores'>
-                      <span>
-                        <b>{item.strikes}</b> S
-                      </span>
-                      <span>
-                        <b>{item.balls}</b> B
-                      </span>
+                      {item.strikes === 0 && item.balls === 0 ? (
+                        <span className='history-list__out' aria-label='아웃'>
+                          OUT
+                        </span>
+                      ) : (
+                        <>
+                          <span>
+                            <b>{item.strikes}</b> S
+                          </span>
+                          <span>
+                            <b>{item.balls}</b> B
+                          </span>
+                        </>
+                      )}
                     </div>
                     {item.solved && (
                       <span className='history-list__home-run'>HOME RUN</span>
