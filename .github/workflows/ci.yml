@@ -1,0 +1,83 @@
+name: Quest 504 CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify frontend, backend and Docker
+    runs-on: ubuntu-latest
+
+    # JUnit 테스트 전용 PostgreSQL
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: quest504_test
+          POSTGRES_USER: quest504_ci
+          POSTGRES_PASSWORD: ci_only_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U quest504_ci -d quest504_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # 운영 DB와 무관한 임시 테스트 환경변수
+    env:
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      POSTGRES_DB: quest504_test
+      POSTGRES_USER: quest504_ci
+      POSTGRES_PASSWORD: ci_only_test_password
+
+    steps:
+      # 1. GitHub 코드 가져오기
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Node.js 설정
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # 3. React 검증
+      - name: Verify frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+
+      # 4. Java 설정
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+          cache-dependency-path: |
+            backend/build.gradle
+            backend/settings.gradle
+            backend/gradle/wrapper/gradle-wrapper.properties
+
+      # 5. Spring Boot JUnit 테스트
+      - name: Test backend
+        working-directory: backend
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean test --no-daemon
+
+      # 6. 전체 Docker 빌드 검증
+      - name: Build Docker image
+        run: docker build -t quest504:ci .
