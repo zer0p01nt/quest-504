@@ -27,7 +27,8 @@ class PlayerRepositoryTest {
     @Test
     void saveAndFindPlayerTest() {
         // 1. 테스트용 username 생성
-        String username = "player-" + UUID.randomUUID();
+        String username = "player-"
+                + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         Player player = new Player(username, "dummy-hash");
 
         // 2. Repository로 저장

@@ -36,10 +36,9 @@ class RewardConcurrencyTest {
     @Test
     void concurrentRewardClaimsTest() throws Exception {
         // 1. Player 생성 및 저장
-        Player player = new Player(
-                "player-" + UUID.randomUUID(),
-                "dummy-hash"
-        );
+        String username = "player-"
+                + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        Player player = new Player(username, "dummy-hash");
         playerRepository.saveAndFlush(player);
         Long playerId = player.getId();
 
