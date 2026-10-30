@@ -22,8 +22,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(auth -> auth
+
+                        // React 정적 파일 접근 허용
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/",
+                                "/index.html",
+                                "/assets/**",
+                                "/favicon.svg",
+                                "/favicon.ico"
+                        ).permitAll()
+
+                        // 인증 API
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
+
+                        // 나머지 API는 로그인 필요
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
